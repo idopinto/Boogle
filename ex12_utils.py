@@ -4,7 +4,8 @@ def load_words_dict(file_path):
         word_dict = dict()
         for line in data_file:
             word = line.strip().split()
-            word_dict[word] = True
+            word_dict[word[0]] = True
+        print(word_dict["AAHED"])
         return word_dict
 
 
