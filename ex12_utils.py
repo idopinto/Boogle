@@ -1,13 +1,13 @@
 def load_words_dict(file_path):
     """This function gets a filepath of file with records and returns it as a list of records."""
     with open(file_path) as data_file:
-        records = []
+        word_dict = dict()
         for line in data_file:
-            words = line.strip().split()
-            records.append(Record(words[0], words[1:]))
-        return records
+            word_dict[line] = True
+        return word_dict
 
 
+print(load_words_dict("boggle_dict.txt"))
 def is_valid_path(board, path, words):
     pass
 
