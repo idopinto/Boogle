@@ -3,7 +3,8 @@ def load_words_dict(file_path):
     with open(file_path) as data_file:
         word_dict = dict()
         for line in data_file:
-            word_dict[line] = True
+            word = line.strip().split()
+            word_dict[word] = True
         return word_dict
 
 
