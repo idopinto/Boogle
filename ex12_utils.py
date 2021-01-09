@@ -33,12 +33,12 @@ def is_valid_path(board, path, words):
     for cur in range(len(path) - 1):
         if not is_legal_coord(path[cur][0], path[cur][1]) or not check_next_coord(path[cur], path[cur + 1]):
             return None
-            word += board[path[cur][0]][path[cur][1]]
-        word += board[path[-1][0]][path[-1][1]]
-        if word in words.keys() and words[word]:
-            return word
-        else:
-            return None
+        word += board[path[cur][0]][path[cur][1]]
+    word += board[path[-1][0]][path[-1][1]]
+    if word in words.keys() and words[word]:
+        return word
+    else:
+        return None
 
 
 def find_length_n_words(n, board, words):
