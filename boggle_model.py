@@ -19,42 +19,9 @@ class BoggleModel:
     def __init__(self):
         self.restart_game()
 
-    def set_display(self):
-        self.__current_display += self.get_letter_from_coord()
-        self.build_path(self.__current_coord)
-
-    def get_display(self):
-        return self.__current_display
-
-    def build_path(self, coord):
-        self.__current_path.append(coord)
-
     def slice_path(self):
         if self.__current_coord in self.__current_path:
             self.__current_path = self.__current_path[:self.__current_path.index(self.__current_coord) + 1]
-
-    def reset_path(self):
-        self.__current_path = list()
-
-    def set_current_coord(self, coord):
-        self.__current_coord = coord
-
-    def get_letter_from_coord(self):
-        return self.__board[self.__current_coord[0]][self.__current_coord[1]]
-
-    def get_path(self):
-        return self.__current_path
-
-    def restart_game(self):
-        self.__current_coord = tuple()
-        self.__current_display = ''
-        self.__current_path = list()
-        self.__already_found = list()
-        self.__word_dict = load_words_dict(FILE_NAME)
-        self.__board = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
-                        ['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
-        self.__score = 0
-        self.__n_length_dict = self.generate_n_length_dict()
 
     def match_word(self):
         n = len(self.__current_path)
@@ -70,23 +37,27 @@ class BoggleModel:
             self.__current_display = ''
             self.reset_path()
             return
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~RESET_METHODS~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    def reset_path(self):
+        self.__current_path = list()
 
-    def update_n_length_dict(self, n):
-        if self.__n_length_dict[n] >= 1:
-            self.__n_length_dict[n] -= 1
-            if self.__n_length_dict[n] == 0:
-                del self.__n_length_dict[n]
+    def restart_game(self):
+        self.__current_coord = tuple()
+        self.__current_display = ''
+        self.__current_path = list()
+        self.__already_found = list()
+        self.__word_dict = load_words_dict(FILE_NAME)
+        self.__board = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
+                        ['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
+        self.__score = 0
+        self.__n_length_dict = self.set_n_length_dict()
 
-    def update_score(self, n):
-        self.__score += n
-
-    def get_score(self):
-        return self.__score
-
-    def get_board(self):
-        return self.__board
-
-    def generate_n_length_dict(self):
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~SETTERS~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    def set_n_length_dict(self):
         n_length_dict = dict()
         for i in range(MIN_PATH, MAX_PATH + 1):
             x = len(find_length_n_words(i, self.__board, self.__word_dict))
@@ -94,15 +65,55 @@ class BoggleModel:
                 n_length_dict[i] = x
         return n_length_dict
 
+    def set_current_coord(self, coord):
+        self.__current_coord = coord
+
+    def set_display(self):
+        self.__current_display += self.get_letter_from_coord()
+        self.update_path(self.__current_coord)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~GETTERS~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    def get_score(self):
+        return self.__score
+
+    def get_board(self):
+        return self.__board
+
     def get_n_length_dict(self):
         return self.__n_length_dict
+
+    def get_letter_from_coord(self):
+        return self.__board[self.__current_coord[0]][self.__current_coord[1]]
+
+    def get_path(self):
+        return self.__current_path
+
+    def get_display(self):
+        return self.__current_display
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~UPDATE_METHODS~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    def update_score(self, n):
+        self.__score += n
+
+    def update_n_length_dict(self, n):
+        if self.__n_length_dict[n] >= 1:
+            self.__n_length_dict[n] -= 1
+            if self.__n_length_dict[n] == 0:
+                del self.__n_length_dict[n]
+
+    def update_path(self, coord):
+        self.__current_path.append(coord)
 
 
 x = BoggleModel()
 lst = x.get_board()
 for line in lst:
     print(line)
-print(x.generate_n_length_dict())
+print(x.set_n_length_dict())
 x.set_current_coord((0, 2))
 x.set_display()
 x.set_current_coord((1, 3))
