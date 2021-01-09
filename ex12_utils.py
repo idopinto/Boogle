@@ -8,7 +8,7 @@ MIN_PATH = 3
 MAX_PATH = 16
 BOARD_COORDINATES = [(i, j) for i in range(SIZE_BOARD) for j in range(SIZE_BOARD)]
 
-LETTER_HOVER_COlOR = ""
+LETTER_HOVER_COlOR = "" # choose colors
 REGULAR_COLOR = ""
 LETTER_ACTIVE_COlOR = ""
 LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED, "bg": REGULAR_COLOR,
