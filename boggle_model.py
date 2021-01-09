@@ -3,12 +3,12 @@ from typing import *
 
 
 class BoggleModel:
-    __current_coord: Tuple[int,int]  # is the last coord that was clicked
+    __current_coord: Tuple[int, int]  # is the last coord that was clicked
     __current_display: str  # is the current sequence e.g 'BE' or 'BED' or 'BEDA'
-    __previous_coords: List[Tuple[int,int]]  # saves all the previous coords in a a list so the player won't click them again
-    __already_found: List[str] # list of all the words the player found
+    __previous_coords: List[Tuple[int, int]]  # saves all the previous coords in a a list so the player won't click them again
+    __already_found: List[str]  # list of all the words the player found
     __word_dict: Dict
-
+    __board: List[List[str]]
 
     def __init__(self):
         self.restart_game()
@@ -20,7 +20,12 @@ class BoggleModel:
         pass
 
     def restart_game(self):
-        pass
+        self.__current_coord = tuple()
+        self.__current_display = ''
+        self.__previous_coords = list()
+        self.__already_found = list()
+        self.__word_dict = ex12_utils.get_word_dict()
+        self.__board = boggle_board_randomizer.randomize_board()
 
 
-
+x = BoggleModel()
