@@ -7,6 +7,12 @@ LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED,
                 "activebackground": LETTER_ACTIVE_COlOR}
 
 
-class Boggle_GUI:
+class BoggleBoard:
     def __init__(self):
         pass
+
+
+
+class Timer:
+    pass
+
