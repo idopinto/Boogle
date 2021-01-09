@@ -48,10 +48,14 @@ def is_valid_path(board, path, words):
 def find_length_n_words(n, board, words):
     # if not 3 <= n <= 16:
     #     return None
+    if not isinstance(n, int) or n < 3 or n > 16:
+        raise ValueError("Invalid length")
+
     length_n_words = {word: cond for (word, cond) in words.items() if len(word) == n}
     n_length_paths_combinations = list(itertools.combinations(BOARD_COORDINATE, n))
-    # for path in n_length_paths_combinations:
-    #     print(path)
+
+        # for path in n_length_paths_combinations:
+        #     print(path)
     result_lst = list()
     for possible_path in n_length_paths_combinations:
         possible_word = is_valid_path(board, possible_path, length_n_words)
@@ -59,6 +63,8 @@ def find_length_n_words(n, board, words):
             length_n_words[possible_word] = False
             result_lst.append((possible_word,[possible_path]))
     return result_lst
+    # except ValueError:
+    #     print("Invalid length")
 
     #
     # for word in length_n_words:
@@ -75,6 +81,6 @@ for line in board1:
     print(line)
 #print(is_valid_path(board,[(4,2),(4,3),(4,4)],my_dict))
 
-print(find_length_n_words(3, board1, my_dict))
+print(find_length_n_words('22', board1, my_dict))
 # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
 # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
