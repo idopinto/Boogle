@@ -1,74 +1,95 @@
 import boggle_board_randomizer
 import itertools
 import math
+import tkinter as tki
 
 SIZE_BOARD = 4
 MIN_PATH = 3
 MAX_PATH = 16
 BOARD_COORDINATES = [(i, j) for i in range(SIZE_BOARD) for j in range(SIZE_BOARD)]
 
-
-def load_words_dict(file_path):
-    """This function gets a filepath of file with records and returns it as a list of records."""
-    with open(file_path) as data_file:
-        word_dict = dict()
-        for line in data_file:
-            word = line.strip().split()
-            word_dict[word[0]] = True
-        return word_dict
+LETTER_HOVER_COlOR = ""
+REGULAR_COLOR = ""
+LETTER_ACTIVE_COlOR = ""
+LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED, "bg": REGULAR_COLOR,
+                "activebackground": LETTER_ACTIVE_COlOR}
 
 
-def is_legal_coord(row, col):
-    return 0 <= row < SIZE_BOARD and 0 <= col < SIZE_BOARD
+class BoogleModel:
 
+    def __init__(self):
+        pass
 
-def check_next_coord(current_coord, next_coord):
-    return math.fabs(current_coord[0] - next_coord[0]) <= 1 and math.fabs(current_coord[1] - next_coord[1]) <= 1
+    def load_words_dict(self, file_path):
+        """This function gets a filepath of file with records and returns it as a list of records."""
+        with open(file_path) as data_file:
+            word_dict = dict()
+            for line in data_file:
+                word = line.strip().split()
+                word_dict[word[0]] = True
+            return word_dict
 
+    def is_legal_coord(self, row, col):
+        return 0 <= row < SIZE_BOARD and 0 <= col < SIZE_BOARD
 
-def is_valid_path(board, path, words):
-    if len(path) < MIN_PATH:
-        return None
-    word = ''
-    for cur in range(len(path) - 1):
-        row, col = path[cur][0], path[cur][1]
-        if not is_legal_coord(row, col) or not check_next_coord((row, col), path[cur + 1]):
+    def check_next_coord(self, current_coord, next_coord):
+        return math.fabs(current_coord[0] - next_coord[0]) <= 1 and math.fabs(current_coord[1] - next_coord[1]) <= 1
+
+    def is_valid_path(self, board, path, words):
+        if len(path) < 3:
             return None
-        word += board[row][col]
-    word += board[path[-1][0]][path[-1][1]]
-    if word in words.keys() and words[word]:
-        return word
-    else:
-        return None
+        word = ''
+        for cur in range(len(path) - 1):
+            if not self.is_legal_coord(path[cur][0], path[cur][1]) or not self.check_next_coord(path[cur],
+                                                                                                path[cur + 1]):
+                return None
+            word += board[path[cur][0]][path[cur][1]]
+        word += board[path[-1][0]][path[-1][1]]
+        if word in words.keys() and words[word]:
+            return word
+        else:
+            return None
+
+    def find_length_n_words(self, n, board, words):
+
+        if not isinstance(n, int) or n < MIN_PATH or n > MAX_PATH:
+            raise ValueError("Invalid length")
+
+        length_n_words = {word: cond for (word, cond) in words.items() if len(word) == n}
+        n_length_paths_combinations = list(itertools.combinations(BOARD_COORDINATES, n))
+
+        result_lst = list()
+        for possible_path in n_length_paths_combinations:
+            possible_word = self.is_valid_path(board, possible_path, length_n_words)
+            if possible_word is not None and length_n_words[possible_word]:
+                length_n_words[possible_word] = False
+                result_lst.append((possible_word, [possible_path]))
+        return result_lst
 
 
-def find_length_n_words(n, board, words):
+class BoogleGui:
+    def __init__(self):
+        pass
 
-    if not isinstance(n, int) or n < MIN_PATH or n > MAX_PATH:
-        raise ValueError("Invalid length")
+    def run(self):
+        pass
 
-    length_n_words = {word: cond for (word, cond) in words.items() if len(word) == n}
-    n_length_paths_combinations = list(itertools.combinations(BOARD_COORDINATES, n))
+    def set_display(self):
+        pass
 
-    result_lst = list()
-    for possible_path in n_length_paths_combinations:
-        possible_word = is_valid_path(board, possible_path, length_n_words)
-        if possible_word is not None and length_n_words[possible_word]:
-            length_n_words[possible_word] = False
-            result_lst.append((possible_word, [possible_path]))
-    return result_lst
+    def get_letters_on_board(self):
+        pass
 
-
-board = boggle_board_randomizer.randomize_board()
-# print(is_valid_path(board,[()]))
-my_dict = load_words_dict("boggle_dict.txt")
-# print(load_words_dict("boggle_dict.txt"))
+# board = boggle_board_randomizer.randomize_board()
+# # print(is_valid_path(board,[()]))
+# my_dict = load_words_dict("boggle_dict.txt")
+# # print(load_words_dict("boggle_dict.txt"))
+# #
+# board1 = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'], ['A', 'B', 'S', 'D']]
+# for line in board1:
+#     print(line)
+# # print(is_valid_path(board,[(4,2),(4,3),(4,4)],my_dict))
 #
-board1 = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'], ['A', 'B', 'S', 'D']]
-for line in board1:
-    print(line)
-# print(is_valid_path(board,[(4,2),(4,3),(4,4)],my_dict))
-
-print(find_length_n_words(3, board1, my_dict))
-# print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
-# print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
+# print(find_length_n_words(3, board1, my_dict))
+# # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
+# # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
