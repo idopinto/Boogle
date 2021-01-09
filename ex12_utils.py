@@ -40,7 +40,6 @@ def is_valid_path(board, path, words):
         word += board[path[cur][0]][path[cur][1]]
     word += board[path[-1][0]][path[-1][1]]
     if word in words.keys() and words[word]:
-        # words[word] = False
         return word
     else:
         return None
@@ -56,7 +55,8 @@ def find_length_n_words(n, board, words):
     result_lst = list()
     for possible_path in n_length_paths_combinations:
         possible_word = is_valid_path(board, possible_path, length_n_words)
-        if possible_word is not None:
+        if possible_word is not None and length_n_words[possible_word]:
+            length_n_words[possible_word] = False
             result_lst.append((possible_word,[possible_path]))
     return result_lst
 
@@ -70,11 +70,11 @@ board = boggle_board_randomizer.randomize_board()
 my_dict = load_words_dict("boggle_dict.txt")
 # print(load_words_dict("boggle_dict.txt"))
 #
-# board1= [['A','A','B',"C"],['E','S','D','E'],['Z','QU','A','P'],['Y','B','D','D']]
-for line in board:
+board1= [['A','A','B',"C"],['E','S','D','E'],['Z','QU','A','P'],['A','B','S','D']]
+for line in board1:
     print(line)
 #print(is_valid_path(board,[(4,2),(4,3),(4,4)],my_dict))
 
-print(find_length_n_words(3, board, my_dict))
+print(find_length_n_words(3, board1, my_dict))
 # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
 # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
