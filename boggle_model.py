@@ -50,8 +50,8 @@ class BoggleModel:
         self.__current_path = list()
         self.__already_found = list()
         self.__word_dict = load_words_dict(FILE_NAME)
-        self.__board = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
-                        ['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
+        self.__board = boggle_board_randomizer.randomize_board()#[['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
+                        #['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
         self.__score = 0
 
     def match_word(self):
@@ -77,23 +77,33 @@ class BoggleModel:
     def get_board(self):
         return self.__board
 
+    def generate_n_length_dict(self):
+        n_length_dict = dict()
+        for i in range(MIN_PATH, MAX_PATH+1):
+            x = len(find_length_n_words(i, self.__board,self.__word_dict))
+            if x > 0:
+                n_length_dict[i] = x
+        return n_length_dict
+
+
+
 
 x = BoggleModel()
 lst = x.get_board()
 for line in lst:
     print(line)
-
-x.set_current_coord((0, 2))
-x.set_display()
-x.set_current_coord((1, 3))
-x.set_display()
-# x.set_current_coord((2,3))
+print(x.generate_n_length_dict())
+# x.set_current_coord((0, 2))
 # x.set_display()
-x.set_current_coord((1, 2))
-x.set_display()
-print(x.get_path())
-print(x.get_display())
-x.match_word()
-print(x.get_score())
+# x.set_current_coord((1, 3))
+# x.set_display()
+# # x.set_current_coord((2,3))
+# # x.set_display()
+# x.set_current_coord((1, 2))
+# x.set_display()
+# print(x.get_path())
+# print(x.get_display())
+# x.match_word()
+# print(x.get_score())
 # x.slice_path()
 # print(x.get_path())
