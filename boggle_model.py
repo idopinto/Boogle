@@ -14,6 +14,7 @@ class BoggleModel:
     __word_dict: Dict
     __board: List[List[str]]
     __score: int
+    __n_length_dict: Dict
 
     def __init__(self):
         self.restart_game()
@@ -50,9 +51,10 @@ class BoggleModel:
         self.__current_path = list()
         self.__already_found = list()
         self.__word_dict = load_words_dict(FILE_NAME)
-        self.__board = boggle_board_randomizer.randomize_board()#[['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
-                        #['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
+        self.__board = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'],
+                        ['A', 'B', 'S', 'D']]  # boggle_board_randomizer.randomize_board()
         self.__score = 0
+        self.__n_length_dict = self.generate_n_length_dict()
 
     def match_word(self):
         n = len(self.__current_path)
@@ -64,9 +66,16 @@ class BoggleModel:
             self.__word_dict[self.__current_display] = False
             self.update_score(n ** 2)
             self.__already_found.append(self.__current_display)
+            self.update_n_length_dict(n)
             self.__current_display = ''
             self.reset_path()
             return
+
+    def update_n_length_dict(self, n):
+        if self.__n_length_dict[n] >= 1:
+            self.__n_length_dict[n] -= 1
+            if self.__n_length_dict[n] == 0:
+                del self.__n_length_dict[n]
 
     def update_score(self, n):
         self.__score += n
@@ -79,13 +88,14 @@ class BoggleModel:
 
     def generate_n_length_dict(self):
         n_length_dict = dict()
-        for i in range(MIN_PATH, MAX_PATH+1):
-            x = len(find_length_n_words(i, self.__board,self.__word_dict))
+        for i in range(MIN_PATH, MAX_PATH + 1):
+            x = len(find_length_n_words(i, self.__board, self.__word_dict))
             if x > 0:
                 n_length_dict[i] = x
         return n_length_dict
 
-
+    def get_n_length_dict(self):
+        return self.__n_length_dict
 
 
 x = BoggleModel()
@@ -93,17 +103,24 @@ lst = x.get_board()
 for line in lst:
     print(line)
 print(x.generate_n_length_dict())
-# x.set_current_coord((0, 2))
-# x.set_display()
-# x.set_current_coord((1, 3))
-# x.set_display()
-# # x.set_current_coord((2,3))
+x.set_current_coord((0, 2))
+x.set_display()
+x.set_current_coord((1, 3))
+x.set_display()
+# x.set_current_coord((2,3))
 # # x.set_display()
-# x.set_current_coord((1, 2))
-# x.set_display()
-# print(x.get_path())
-# print(x.get_display())
-# x.match_word()
-# print(x.get_score())
+x.set_current_coord((1, 2))
+x.set_display()
+x.set_current_coord((2, 2))
+x.set_display()
+x.set_current_coord((3, 3))
+x.set_display()
+x.set_current_coord((3, 2))
+x.set_display()
+print(x.get_path())
+print(x.get_display())
+x.match_word()
+print(x.get_score())
 # x.slice_path()
 # print(x.get_path())
+print(x.get_n_length_dict())
