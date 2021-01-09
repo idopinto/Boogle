@@ -1,6 +1,8 @@
 import ex12_utils, boggle_board_randomizer
 from typing import *
 
+FILE_NAME = 'boggle_dict.txt'
+
 
 class BoggleModel:
     __current_coord: Tuple[int, int]  # is the last coord that was clicked
@@ -24,8 +26,14 @@ class BoggleModel:
         self.__current_display = ''
         self.__previous_coords = list()
         self.__already_found = list()
-        self.__word_dict = ex12_utils.get_word_dict()
+        self.__word_dict = ex12_utils.load_words_dict(FILE_NAME)
         self.__board = boggle_board_randomizer.randomize_board()
+
+    def get_board(self):
+        return self.__board
 
 
 x = BoggleModel()
+lst = x.get_board()
+for line in lst:
+    print(line)

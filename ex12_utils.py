@@ -1,7 +1,6 @@
 import boggle_board_randomizer
 import itertools
 import math
-import tkinter as tki
 
 SIZE_BOARD = 4
 MIN_PATH = 3
