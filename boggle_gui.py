@@ -2,6 +2,7 @@ import tkinter as tki
 # import boggle_model,boggle_controller
 import boggle_board_randomizer
 import datetime
+
 LETTER_HOVER_COlOR = "red"  # choose colors
 REGULAR_COLOR = "lightgray"
 LETTER_ACTIVE_COlOR = "slateblue"
@@ -10,67 +11,112 @@ LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED,
 FILE_NAME = 'boggle_dict.txt'
 
 
-class BoggleBoard:
+class BoggleGame(tki.Tk):
 
-    def __init__(self):
-        root = tki.Tk()
-        root.title("BoggleGame")
-        root.resizable(False, False)
-        self._main_window = root
+    def __init__(self, *args, **kwargs):
+        tki.Tk.__init__(self, *args, **kwargs)
+        self.title("BoogleGame")
+        container = tki.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        self._current_widget = None
 
-        self._outer_frame = tki.Frame(root, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR, highlightthickness=5)
-        self._outer_frame.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+        self._frames = {}
+        for F in (Startscreen, Board):
+            screen_name = F.__name__
+            frame = F(container, self)
+            self._frames[screen_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
 
-        self._display_label = tki.Label(self._outer_frame, font=("Courier", 30),
-                                        bg=REGULAR_COLOR, width=23, relief="ridge")
-        self._display_label.pack(side=tki.TOP, fill=tki.BOTH)
-
-        self._display_time = tki.Label(self._outer_frame,font=("Courier", 30),
-                                        bg=REGULAR_COLOR, width=10, relief="ridge")
-        self._seconds_left = 180
-        self._display_time.pack(side=tki.TOP, fill=tki.BOTH)
-        self._lower_frame = tki.Frame(self._outer_frame)
-        self._lower_frame.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+        self.show_frame("Startscreen")
         self._board_letters = boggle_board_randomizer.randomize_board()
         self._letters = {}
+        self._letters_displsy = ""
         self._path = []
+        self.words_left = {3: 100, 4: 70, 5: 80, 6: 50, 7: 3}
+        self.seconds_left = 180
+        self.score = 0
+        self.found_words = ["amazing", "okay"]
 
-    def run(self):
-        self._main_window.mainloop()
+    def set_words_left(self, dict):
+        self.words_left = dict
+
+    def set_found_words(self, found_words_list):
+        self.found_words = found_words_list
+
+    def set_score(self, score):
+        self.score += score
+        self._frames["Board"].display_score["text"] = "Score:" + str(self.score)
 
     def set_display(self):
-        self._display_label["text"] = self._path
+        self._frames["Board"].display_label["text"] = self._letters_displsy
 
     def get_path(self):
         return self._path
 
+    def create_found_words(self):
+        for word in self.found_words:
+            label = tki.Label(self._frames["Board"].found_words_frame, font=("Courier", 15),
+                              bg=REGULAR_COLOR, width=15, text=word)
+            label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+
+    def create_words_left(self):
+        for i in range(0, 5):
+            x = self.make_Frames_for_left_words("i+3", "50", 0, i)
+            words_left_label = tki.Label(x, font=("Courier", 30),
+                                         bg=REGULAR_COLOR, text=str(i + 3) + ":")
+            words_left_label.pack(side=tki.LEFT, fill=tki.BOTH)
+            words_left_label__ = tki.Label(x, font=("Courier", 30),
+                                           bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[i + 3]))
+            words_left_label__.pack(side=tki.LEFT, fill=tki.BOTH)
+
+    def make_Frames_for_left_words(self, length, words_left, row, col, rowspan=1, columnspan=1):
+        words_left_frame = tki.Frame(self._frames["Board"].words_left_frame, bg=REGULAR_COLOR,
+                                     highlightbackground=REGULAR_COLOR,
+                                     highlightthickness=5)
+        words_left_frame.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
+
     def create_board(self):
         for i in range(4):
-            tki.Grid.columnconfigure(self._lower_frame, i, weight=1)
+            tki.Grid.columnconfigure(self._frames["Board"].lower_frame, i, weight=1)
 
         for i in range(4):
-            tki.Grid.rowconfigure(self._lower_frame, i, weight=1)
+            tki.Grid.rowconfigure(self._frames["Board"].lower_frame, i, weight=1)
 
         for row in range(4):
             for col in range(4):
                 self.make_letter(self._board_letters[row][col], row, col)
 
-    def callback(self):
-        self._path.append((0,0))
+    def callback(self, row, col):
+        self._path.append((row, col))
+        self._letters_displsy += self._letters[(row, col)]
         self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
-        letter = tki.Button(self._lower_frame, text=letter_char, **LETTER_STYLE, command= self.callback)
+        letter = tki.Button(self._frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
+                            command=lambda: self.callback(row, col))
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
-        self._letters[letter_char] = (row,col)
+        self._letters[(row, col)] = letter_char
+
+        def _add(event):
+            widget = event.widget.winfo_containing(event.x_root, event.y_root)
+            if self._current_widget != widget:
+                if self._current_widget:
+                    letter.bind("<Leave>", _on_leave)
+                self._current_widget = widget
+                letter.bind("<Enter>", _on_enter)
 
         def _on_enter(event):
             letter['background'] = LETTER_HOVER_COlOR
-            #self.callback()
+            self._letters_displsy += self._letters[(row, col)]
+            self.set_display()
+            # self.callback()
 
         def _on_leave(event):
             letter['background'] = REGULAR_COLOR
 
+        self.bind_all("<B1-Motion>", _add)
         letter.bind("<Enter>", _on_enter)
         letter.bind("<Leave>", _on_leave)
 
@@ -78,25 +124,104 @@ class BoggleBoard:
 
     def timer_countdown(self):
         """update label based on the time left"""
-        self._display_time['text'] = self.convert_seconds_left_to_time()
-        if self._seconds_left:
-            self._seconds_left -= 1
-            self._display_time.after(1000,self.timer_countdown)
-        else:
-            return "Gameover"
+        self._frames["Board"].display_time['text'] = self.convert_seconds_left_to_time()
+        if self.seconds_left:
+            self.seconds_left -= 1
+            self._frames["Board"].display_time.after(1000, self.timer_countdown)
+        if self.seconds_left == 0:
+            self.show_frame("Startscreen")
 
     def convert_seconds_left_to_time(self):
-        return datetime.timedelta(seconds=self._seconds_left)
+        return datetime.timedelta(seconds=self.seconds_left)
+
+    def show_frame(self, container):
+        frame = self._frames[container]
+        frame.tkraise()
+        if container == "Board":
+            self.run()
+
+    def run(self):
+        self.set_display()
+        self.create_board()
+        self.timer_countdown()
+        self.create_words_left()
+        self.create_found_words()
 
 
+class Startscreen(tki.Frame):
+
+    def __init__(self, parent, controller):
+        tki.Frame.__init__(self, parent)
+        self._controller = controller
+        self._start_frame = tki.Label(self, bg="white", highlightbackground=REGULAR_COLOR, highlightthickness=5,
+                                      text="Click start to start playing!", font=("Courier", 20))
+        self._start_frame.pack(side=tki.TOP, fill=tki.BOTH, pady=100, padx=10)
+        self._start_button = tki.Button(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR, highlightthickness=5,
+                                        font=("Courier", 15), text="Start", padx=30, pady=8,
+                                        command=lambda: controller.show_frame("Board"))
+        self._start_button.pack(side=tki.TOP)
+
+
+class Board(tki.Frame):
+
+    def __init__(self, parent, controller):
+        tki.Frame.__init__(self, parent)
+        self.outer_frame = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR, highlightthickness=5)
+        self.outer_frame.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+
+        self.display_label = tki.Label(self.outer_frame, font=("Courier", 30),
+                                       bg=REGULAR_COLOR, width=23, relief="ridge")
+        self.display_label.pack(side=tki.TOP, fill=tki.BOTH)
+        self.display_score = tki.Label(self.outer_frame, font=("Courier", 30),
+                                       bg=REGULAR_COLOR, width=23, relief="ridge")
+        self.display_score.pack(side=tki.TOP, fill=tki.BOTH)
+
+        self.display_time = tki.Label(self.outer_frame, font=("Courier", 30),
+                                      bg=REGULAR_COLOR, width=10, relief="ridge")
+        self.display_time.pack(side=tki.TOP, fill=tki.BOTH)
+
+        self.words_left_frame = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR,
+                                          highlightthickness=5)
+        self.words_left_frame.pack(side=tki.BOTTOM, fill=tki.BOTH, expand=True)
+        self.found_words_frame = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR,
+                                           highlightthickness=5)
+        self.found_words_frame.pack(side=tki.RIGHT, fill=tki.BOTH, expand=True)
+        self.found_words_label = tki.Label(self.found_words_frame, font=("Courier", 30),
+                                           bg=REGULAR_COLOR, width=23, relief="ridge", text="Found words:")
+        self.found_words_label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+
+        self.lower_frame = tki.Frame(self.outer_frame)
+        self.lower_frame.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+
+
+class Drag_and_Drop:
+    def add_dragable(self, widget):
+        widget.bind("<ButtonPress-1>", self.on_start)
+        widget.bind("<B1-Motion>", self.on_drag)
+        widget.bind("<ButtonRelease-1>", self.on_drop)
+        widget.configure(cursur="hand1")
+
+    def on_start(self, event):
+        pass
+
+    def on_drag(self, event):
+        pass
+
+    def on_drop(self, event):
+        x, y = event.widget.winfo_pointerxy()
+        target = event.widget.winfo_pointerxy(x, y)
+        try:
+            target.configure()
+        except:
+            pass
 
 
 class Timer:
     pass
 
 
-x = BoggleBoard()
-x.set_display()
-x.create_board()
-x.timer_countdown()
-x.run()
+x = BoggleGame()
+x.set_score(30)
+dict = {3: 40, 4: 70, 5: 80, 6: 50, 7: 3}
+x.set_words_left(dict)
+x.mainloop()
