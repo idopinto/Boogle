@@ -31,15 +31,19 @@ class BoggleGame(tki.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame("Startscreen")
-        self._board_letters = boggle_board_randomizer.randomize_board()
+
+        self._board_letters = []
         self._letters = {}
         self._letters_displsy = ""
         self._path = []
-        self.words_left = {3: 100, 4: 70, 5: 80, 6: 50, 7: 3}
+        self.words_left = {}
         self.seconds_left = 180
         self.score = 0
         self.found_words = []
         self._letters_2 = {}
+
+    def set_board(self, board):
+        self._board_letters = board
 
     def set_words_left(self, dict):
         self.words_left = dict
@@ -124,11 +128,14 @@ class BoggleGame(tki.Tk):
                 self.current_widget.event_generate("<<B1-Enter>>")
 
         def on_enter(event):
-            self._path.append((row, col))
+            if (row,col) in self._path:
+                pass
+            else:
+                self._path.append((row, col))
+                self._letters_displsy += self._letters[(row, col)]
+                self.set_display()
             # letter['bg'] = "slateblue"
-            self._letters_displsy += self._letters[(row, col)]
 
-            self.set_display()
 
         def on_leave(event):
             letter['bg'] = REGULAR_COLOR
