@@ -7,6 +7,9 @@ class BoggleController:
         self._model = BoggleModel()
         x = self._model.get_board()
         self._gui.set_board(x)
+        self._gui.create_board()
+        #self._gui.create_words_left()
+        self._gui.create_found_words()
 
     def set_game(self):
         self._gui.set_board(self._model.get_board())

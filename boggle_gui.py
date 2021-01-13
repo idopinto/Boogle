@@ -172,11 +172,12 @@ class BoggleGame(tki.Tk):
             self.run()
 
     def run(self):
-        self.create_board()
+        self.mainloop()
+        #self.create_board()
         self.set_display()
         self.timer_countdown()
-        self.create_words_left()
-        self.create_found_words()
+        #self.create_words_left()
+        #self.create_found_words()
 
 
 class Startscreen(tki.Frame):
@@ -251,5 +252,3 @@ class Timer:
     pass
 
 
-x = BoggleGame()
-x.mainloop()
