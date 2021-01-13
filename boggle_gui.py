@@ -76,13 +76,13 @@ class BoggleGame(tki.Tk):
             label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
     def create_words_left(self):
-        for i in range(0, 5):
+        for i, item in enumerate(self.words_left):
             x = self.make_Frames_for_left_words("i+3", "50", 0, i)
             words_left_label = tki.Label(x, font=("Courier", 30),
-                                         bg=REGULAR_COLOR, text=str(i + 3) + ":")
+                                         bg=REGULAR_COLOR, text=str(item) + ":")
             words_left_label.pack(side=tki.LEFT, fill=tki.BOTH)
             words_left_label__ = tki.Label(x, font=("Courier", 30),
-                                           bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[i + 3]))
+                                           bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[item]))
             words_left_label__.pack(side=tki.LEFT, fill=tki.BOTH)
 
     def make_Frames_for_left_words(self, length, words_left, row, col, rowspan=1, columnspan=1):
@@ -149,7 +149,7 @@ class BoggleGame(tki.Tk):
         self._frames["Board"].lower_frame.bind_all("<B1-Motion>", start_path)
         letter.bind("<<B1-Enter>>", on_enter)
         # letter.bind("<<B1-Leave>>", on_leave)
-        # letter.bind("<<B1-ButtonRelease>>", on_release)
+        letter.bind("<<B1-ButtonRelease>>", on_release)
 
         return letter
 
@@ -169,13 +169,14 @@ class BoggleGame(tki.Tk):
         frame = self._frames[container]
         frame.tkraise()
         if container == "Board":
-            self.run()
+            self.timer_countdown()
 
     def run(self):
         self.mainloop()
+
         #self.create_board()
-        self.set_display()
-        self.timer_countdown()
+        #self.set_display()
+
         #self.create_words_left()
         #self.create_found_words()
 
@@ -227,6 +228,7 @@ class Board(tki.Frame):
 
 
 class Drag_and_Drop:
+
     def add_dragable(self, widget):
         widget.bind("<ButtonPress-1>", self.on_start)
         widget.bind("<B1-Motion>", self.on_drag)
