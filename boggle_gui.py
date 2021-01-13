@@ -1,10 +1,11 @@
 import tkinter as tki
+from tkmacosx import Button
 # import boggle_model,boggle_controller
 import boggle_board_randomizer
 import datetime
 
-LETTER_HOVER_COlOR = "red"  # choose colors
-REGULAR_COLOR = "lightgray"
+LETTER_HOVER_COlOR = "gray"  # choose colors
+REGULAR_COLOR = "white"
 LETTER_ACTIVE_COlOR = "slateblue"
 LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED, "bg": REGULAR_COLOR,
                 "activebackground": LETTER_ACTIVE_COlOR}
@@ -37,7 +38,8 @@ class BoggleGame(tki.Tk):
         self.words_left = {3: 100, 4: 70, 5: 80, 6: 50, 7: 3}
         self.seconds_left = 180
         self.score = 0
-        self.found_words = ["amazing", "okay"]
+        self.found_words = []
+        self._letters_2 = {}
 
     def set_words_left(self, dict):
         self.words_left = dict
@@ -47,13 +49,21 @@ class BoggleGame(tki.Tk):
 
     def set_score(self, score):
         self.score += score
-        self._frames["Board"].display_score["text"] = "Score:" + str(self.score)
 
     def set_display(self):
         self._frames["Board"].display_label["text"] = self._letters_displsy
+        for coord in self._path:
+            self._letters_2[coord]['bg'] = "slateblue"
+        self._frames["Board"].display_score["text"] = "Score:" + str(self.score)
+        if not self._path:
+            for letter in self._letters_2:
+                self._letters_2[letter]['bg'] = REGULAR_COLOR
 
     def get_path(self):
         return self._path
+
+    def reset_path(self):
+        self._path = []
 
     def create_found_words(self):
         for word in self.found_words:
@@ -89,36 +99,50 @@ class BoggleGame(tki.Tk):
                 self.make_letter(self._board_letters[row][col], row, col)
 
     def callback(self, row, col):
+        self._path = []
+        self._letters_displsy = ""
+        self.set_display()
         self._path.append((row, col))
         self._letters_displsy += self._letters[(row, col)]
         self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
-        letter = tki.Button(self._frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
-                            command=lambda: self.callback(row, col))
+        letter = Button(self._frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
+                        command=lambda: self.callback(row, col))
+        self._letters_2[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
         self._letters[(row, col)] = letter_char
 
-        def _add(event):
+        self.current_widget = None
+
+        def start_path(event):
             widget = event.widget.winfo_containing(event.x_root, event.y_root)
-            if self._current_widget != widget:
-                if self._current_widget:
-                    letter.bind("<Leave>", _on_leave)
-                self._current_widget = widget
-                letter.bind("<Enter>", _on_enter)
+            if self.current_widget != widget:
+                if self.current_widget:
+                    self.current_widget.event_generate("<<B1-ButtonRelease>>")
+                self.current_widget = widget
+                self.current_widget.event_generate("<<B1-Enter>>")
 
-        def _on_enter(event):
-            letter['background'] = LETTER_HOVER_COlOR
+        def on_enter(event):
+            self._path.append((row, col))
+            # letter['bg'] = "slateblue"
             self._letters_displsy += self._letters[(row, col)]
+
             self.set_display()
-            # self.callback()
 
-        def _on_leave(event):
-            letter['background'] = REGULAR_COLOR
+        def on_leave(event):
+            letter['bg'] = REGULAR_COLOR
+            # self._letters_displsy = self._letters_displsy[:-1]
+            # self.set_display()
 
-        self.bind_all("<B1-Motion>", _add)
-        letter.bind("<Enter>", _on_enter)
-        letter.bind("<Leave>", _on_leave)
+        def on_release(event):
+            self._path = []
+            self.set_display()
+
+        self._frames["Board"].lower_frame.bind_all("<B1-Motion>", start_path)
+        letter.bind("<<B1-Enter>>", on_enter)
+        # letter.bind("<<B1-Leave>>", on_leave)
+        # letter.bind("<<B1-ButtonRelease>>", on_release)
 
         return letter
 
@@ -141,8 +165,8 @@ class BoggleGame(tki.Tk):
             self.run()
 
     def run(self):
-        self.set_display()
         self.create_board()
+        self.set_display()
         self.timer_countdown()
         self.create_words_left()
         self.create_found_words()
@@ -221,7 +245,4 @@ class Timer:
 
 
 x = BoggleGame()
-x.set_score(30)
-dict = {3: 40, 4: 70, 5: 80, 6: 50, 7: 3}
-x.set_words_left(dict)
 x.mainloop()
