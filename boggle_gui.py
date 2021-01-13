@@ -52,7 +52,7 @@ class BoggleGame(tki.Tk):
         self.found_words = found_words_list
 
     def set_score(self, score):
-        self.score += score
+        self.score = score
 
     def set_display(self):
         self._frames["Board"].display_label["text"] = self._letters_displsy
@@ -170,6 +170,8 @@ class BoggleGame(tki.Tk):
         frame.tkraise()
         if container == "Board":
             self.timer_countdown()
+            self.create_words_left()
+            self.create_found_words()
 
     def run(self):
         self.mainloop()

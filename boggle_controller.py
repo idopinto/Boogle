@@ -10,9 +10,8 @@ class BoggleController:
         self._gui.create_board()
         y = self._model.get_n_length_dict()
         self._gui.set_words_left(y)
-        self._gui.create_words_left()
-        self._gui.create_found_words()
         self._gui.set_display()
+
 
 
     def set_game(self):
