@@ -24,7 +24,7 @@ class BoggleModel:
             self.__current_path = self.__current_path[:self.__current_path.index(self.__current_coord) + 1]
 
     def match_word(self):
-        n = len(self.__current_path)
+        n = len(self.__current_display)
         if self.__current_display in self.__word_dict.keys() and self.__word_dict[self.__current_display] is False:
             return
 
@@ -49,7 +49,7 @@ class BoggleModel:
         self.__current_path = list()
         self.__already_found = list()
         self.__word_dict = load_words_dict(FILE_NAME)
-        self.__board = boggle_board_randomizer.randomize_board()
+        self.__board = [['A', 'B','A', 'N'], ['D', 'O','N', 'D'], ['QU', 'I','T', 'O'], ['QU', 'I','T', 'N']] #boggle_board_randomizer.randomize_board() #
         self.__score = 0
         self.__n_length_dict = self.set_n_length_dict()
 
@@ -92,6 +92,9 @@ class BoggleModel:
     def get_display(self):
         return self.__current_display
 
+    def get_already_found(self):
+        return self.__already_found
+
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # ~~~~~~~~~~~~~~~~UPDATE_METHODS~~~~~~~~~~~~~~#
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -101,11 +104,18 @@ class BoggleModel:
     def update_n_length_dict(self, n):
         if self.__n_length_dict[n] >= 1:
             self.__n_length_dict[n] -= 1
-            if self.__n_length_dict[n] == 0:
-                del self.__n_length_dict[n]
+            # if self.__n_length_dict[n] == 0:
+            #     del self.__n_length_dict[n]
 
     def update_path(self, coord):
         self.__current_path.append(coord)
+
+    def set_path(self, path):
+        self.__current_path = path
+
+    def set_current_display(self, display):
+        self.__current_display = display
+
 
 
 # x = BoggleModel()

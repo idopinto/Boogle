@@ -1,7 +1,6 @@
 import tkinter as tki
 from tkmacosx import Button
-# import boggle_model,boggle_controller
-import boggle_board_randomizer
+
 import datetime
 
 LETTER_HOVER_COlOR = "gray"  # choose colors
@@ -23,24 +22,30 @@ class BoggleGame(tki.Tk):
         container.grid_columnconfigure(0, weight=1)
         self._current_widget = None
 
-        self._frames = {}
+        self.frames = {}
         for F in (Startscreen, Board):
             screen_name = F.__name__
             frame = F(container, self)
-            self._frames[screen_name] = frame
+            self.frames[screen_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame("Startscreen")
-
+        self.current_coord = ()
         self._board_letters = []
         self._letters = {}
-        self._letters_displsy = ""
+        self.letters_displsy = ""
         self._path = []
         self.words_left = {}
         self.seconds_left = 180
         self.score = 0
         self.found_words = []
+        self.found_words_counter = 0
         self._letters_2 = {}
+        self.words_left_labels = {}
+
+
+    def get_current_cord(self):
+        return self.current_coord
 
     def set_board(self, board):
         self._board_letters = board
@@ -55,10 +60,10 @@ class BoggleGame(tki.Tk):
         self.score = score
 
     def set_display(self):
-        self._frames["Board"].display_label["text"] = self._letters_displsy
+        self.frames["Board"].display_label["text"] = self.letters_displsy
         for coord in self._path:
             self._letters_2[coord]['bg'] = "slateblue"
-        self._frames["Board"].display_score["text"] = "Score:" + str(self.score)
+        self.frames["Board"].display_score["text"] = "Score:" + str(self.score)
         if not self._path:
             for letter in self._letters_2:
                 self._letters_2[letter]['bg'] = REGULAR_COLOR
@@ -66,121 +71,90 @@ class BoggleGame(tki.Tk):
     def get_path(self):
         return self._path
 
-    def reset_path(self):
-        self._path = []
-
     def create_found_words(self):
-        for word in self.found_words:
-            label = tki.Label(self._frames["Board"].found_words_frame, font=("Courier", 15),
+        for word in self.found_words[self.found_words_counter - 1:]:
+            label = tki.Label(self.frames["Board"].found_words_frame, font=("Courier", 15),
                               bg=REGULAR_COLOR, width=15, text=word)
             label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
+    def update_words_left(self):
+        for value in self.words_left_labels.values():
+            value[0]['text'] = self.words_left[value[1]]
+
+
     def create_words_left(self):
-        for i, item in enumerate(self.words_left):
+        for i, key in enumerate(self.words_left):
             x = self.make_Frames_for_left_words("i+3", "50", 0, i)
             words_left_label = tki.Label(x, font=("Courier", 30),
-                                         bg=REGULAR_COLOR, text=str(item) + ":")
+                                         bg=REGULAR_COLOR, text=str(key) + ":")
             words_left_label.pack(side=tki.LEFT, fill=tki.BOTH)
             words_left_label__ = tki.Label(x, font=("Courier", 30),
-                                           bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[item]))
+                                           bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[key]))
+            self.words_left_labels[i] = (words_left_label__,key)
             words_left_label__.pack(side=tki.LEFT, fill=tki.BOTH)
 
     def make_Frames_for_left_words(self, length, words_left, row, col, rowspan=1, columnspan=1):
-        words_left_frame = tki.Frame(self._frames["Board"].words_left_frame, bg=REGULAR_COLOR,
+        words_left_frame = tki.Frame(self.frames["Board"].words_left_frame, bg=REGULAR_COLOR,
                                      highlightbackground=REGULAR_COLOR,
                                      highlightthickness=5)
         words_left_frame.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
 
     def create_board(self):
         for i in range(4):
-            tki.Grid.columnconfigure(self._frames["Board"].lower_frame, i, weight=1)
+            tki.Grid.columnconfigure(self.frames["Board"].lower_frame, i, weight=1)
 
         for i in range(4):
-            tki.Grid.rowconfigure(self._frames["Board"].lower_frame, i, weight=1)
+            tki.Grid.rowconfigure(self.frames["Board"].lower_frame, i, weight=1)
 
         for row in range(4):
             for col in range(4):
                 self.make_letter(self._board_letters[row][col], row, col)
 
     def callback(self, row, col):
-        self._path = []
-        self._letters_displsy = ""
-        self.set_display()
-        self._path.append((row, col))
-        self._letters_displsy += self._letters[(row, col)]
-        self.set_display()
+        self.current_coord = (row, col)
+        if self.current_coord in self._path:
+            pass
+        else:
+            self._path.append((row, col))
+            self.letters_displsy += self._letters[(row, col)]
+            self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
-        letter = Button(self._frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
+        letter = Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
                         command=lambda: self.callback(row, col))
         self._letters_2[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
         self._letters[(row, col)] = letter_char
 
-        self.current_widget = None
-
-        def start_path(event):
-            widget = event.widget.winfo_containing(event.x_root, event.y_root)
-            if self.current_widget != widget:
-                if self.current_widget:
-                    self.current_widget.event_generate("<<B1-ButtonRelease>>")
-                self.current_widget = widget
-                self.current_widget.event_generate("<<B1-Enter>>")
-
-        def on_enter(event):
-            if (row,col) in self._path:
-                pass
-            else:
-                self._path.append((row, col))
-                self._letters_displsy += self._letters[(row, col)]
-                self.set_display()
-            # letter['bg'] = "slateblue"
-
-
-        def on_leave(event):
-            letter['bg'] = REGULAR_COLOR
-            # self._letters_displsy = self._letters_displsy[:-1]
-            # self.set_display()
-
-        def on_release(event):
-            self._path = []
-            self.set_display()
-
-        self._frames["Board"].lower_frame.bind_all("<B1-Motion>", start_path)
-        letter.bind("<<B1-Enter>>", on_enter)
-        # letter.bind("<<B1-Leave>>", on_leave)
-        letter.bind("<<B1-ButtonRelease>>", on_release)
-
         return letter
 
     def timer_countdown(self):
         """update label based on the time left"""
-        self._frames["Board"].display_time['text'] = self.convert_seconds_left_to_time()
+        self.frames["Board"].display_time['text'] = self.convert_seconds_left_to_time()
         if self.seconds_left:
             self.seconds_left -= 1
-            self._frames["Board"].display_time.after(1000, self.timer_countdown)
+            self.frames["Board"].display_time.after(1000, self.timer_countdown)
         if self.seconds_left == 0:
-            self.show_frame("Startscreen")
+             self.seconds_left = 180
+             self.frames["Startscreen"].tkraise()
+
 
     def convert_seconds_left_to_time(self):
         return datetime.timedelta(seconds=self.seconds_left)
 
     def show_frame(self, container):
-        frame = self._frames[container]
+        frame = self.frames[container]
         frame.tkraise()
         if container == "Board":
+            frame.tkraise()
             self.timer_countdown()
             self.create_words_left()
             self.create_found_words()
+        else:
+            pass
 
     def run(self):
         self.mainloop()
-
-        #self.create_board()
-        #self.set_display()
-
-        #self.create_words_left()
-        #self.create_found_words()
 
 
 class Startscreen(tki.Frame):
@@ -228,31 +202,6 @@ class Board(tki.Frame):
         self.lower_frame = tki.Frame(self.outer_frame)
         self.lower_frame.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
-
-class Drag_and_Drop:
-
-    def add_dragable(self, widget):
-        widget.bind("<ButtonPress-1>", self.on_start)
-        widget.bind("<B1-Motion>", self.on_drag)
-        widget.bind("<ButtonRelease-1>", self.on_drop)
-        widget.configure(cursur="hand1")
-
-    def on_start(self, event):
-        pass
-
-    def on_drag(self, event):
-        pass
-
-    def on_drop(self, event):
-        x, y = event.widget.winfo_pointerxy()
-        target = event.widget.winfo_pointerxy(x, y)
-        try:
-            target.configure()
-        except:
-            pass
-
-
-class Timer:
-    pass
-
-
+        self.reset_and_check = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR,
+                                         highlightthickness=5)
+        self.reset_and_check.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
