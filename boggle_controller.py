@@ -11,10 +11,14 @@ class BoggleController:
         y = self._model.get_n_length_dict()
         self._gui.set_words_left(y)
         self._gui.set_display()
-        reset = Button(self._gui.frames["Board"].reset_and_check, text="Reset", **LETTER_STYLE, command=self.reset)
-        check = Button(self._gui.frames["Board"].reset_and_check, text="Check", **LETTER_STYLE, command=self.check)
+        reset = tki.Button(self._gui.frames["Board"].reset_and_check, text="Reset", **LETTER_STYLE, command=self.reset)
+        check = tki.Button(self._gui.frames["Board"].reset_and_check, text="Check", **LETTER_STYLE, command=self.check)
         reset.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=tki.NSEW)
         check.grid(row=0, column=1, rowspan=1, columnspan=1, sticky=tki.NSEW)
+        self._play_again_button = tki.Button(self._gui.frames["PlayAgain"].play_again_frame, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR, highlightthickness=5,
+                                        font=("Courier", 15), text="Play again", padx=30, pady=8,
+                                        command=self.restart)
+        self._play_again_button.pack(side=tki.TOP)
 
 
 
@@ -50,26 +54,26 @@ class BoggleController:
 
 
     def run(self):
-        if self._gui.seconds_left == 0:
-            self.restart()
         self._gui.run()
 
 
 
     def restart(self):
+        self._model.restart_game()
         self._gui.seconds_left = 180
-        self._gui = BoggleGame()
-        self._model = BoggleModel()
-        x = self._model.get_board()
-        self._gui.set_board(x)
+        self._gui.set_board( self._model.get_board())
         self._gui.create_board()
-        y = self._model.get_n_length_dict()
-        self._gui.set_words_left(y)
-        self._gui.set_display()
-        reset = Button(self._gui.frames["Board"].reset_and_check, text="Reset", **LETTER_STYLE, command=self.reset)
-        check = Button(self._gui.frames["Board"].reset_and_check, text="Check", **LETTER_STYLE, command=self.check)
+        self._gui.set_words_left(self._model.get_n_length_dict())
+        reset = tki.Button(self._gui.frames["Board"].reset_and_check, text="Reset", **LETTER_STYLE, command=self.reset)
+        check = tki.Button(self._gui.frames["Board"].reset_and_check, text="Check", **LETTER_STYLE, command=self.check)
         reset.grid(row=0, column=0, rowspan=1, columnspan=1, sticky=tki.NSEW)
         check.grid(row=0, column=1, rowspan=1, columnspan=1, sticky=tki.NSEW)
+        self._gui.show_frame("Board")
+        self._gui.update_words_left()
+        self._gui.found_words = self._model.get_already_found()
+        self._gui.create_found_words()
+        self._gui.set_display()
+
 
 
 if __name__ == "__main__":
