@@ -20,10 +20,9 @@ class BoggleGame(tki.Tk):
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
-        self._current_widget = None
 
         self.frames = {}
-        for F in (Startscreen, Board):
+        for F in (Startscreen, Board, PlayAgain):
             screen_name = F.__name__
             frame = F(container, self)
             self.frames[screen_name] = frame
@@ -36,12 +35,13 @@ class BoggleGame(tki.Tk):
         self.letters_displsy = ""
         self._path = []
         self.words_left = {}
-        self.seconds_left = 180
+        self.seconds_left = 10
         self.score = 0
         self.found_words = []
         self.found_words_counter = 0
         self._letters_2 = {}
         self.words_left_labels = {}
+        self.game_played_counter = 0
 
 
     def get_current_cord(self):
@@ -135,8 +135,9 @@ class BoggleGame(tki.Tk):
             self.seconds_left -= 1
             self.frames["Board"].display_time.after(1000, self.timer_countdown)
         if self.seconds_left == 0:
-             self.seconds_left = 180
-             self.frames["Startscreen"].tkraise()
+             # self.seconds_left = 180
+             self.frames["PlayAgain"].play_again_frame['text'] = f'Time is up! you ended up with {self.score} points'
+             self.frames["PlayAgain"].tkraise()
 
 
     def convert_seconds_left_to_time(self):
@@ -148,13 +149,17 @@ class BoggleGame(tki.Tk):
         if container == "Board":
             frame.tkraise()
             self.timer_countdown()
-            self.create_words_left()
-            self.create_found_words()
+            if self.game_played_counter == 0:
+                self.create_words_left()
+                self.create_found_words()
+                self.game_played_counter += 1
         else:
             pass
 
     def run(self):
         self.mainloop()
+
+
 
 
 class Startscreen(tki.Frame):
@@ -205,3 +210,13 @@ class Board(tki.Frame):
         self.reset_and_check = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR,
                                          highlightthickness=5)
         self.reset_and_check.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
+
+class PlayAgain(tki.Frame):
+
+    def __init__(self,parent, controller):
+        tki.Frame.__init__(self,parent)
+        self._controller = controller
+        self.play_again_frame = tki.Label(self, bg="white", highlightbackground=REGULAR_COLOR, highlightthickness=5,
+                                       font=("Courier", 20))
+        self.play_again_frame.pack(side=tki.TOP, fill=tki.BOTH, pady=100, padx=10)
+

@@ -49,7 +49,7 @@ class BoggleModel:
         self.__current_path = list()
         self.__already_found = list()
         self.__word_dict = load_words_dict(FILE_NAME)
-        self.__board = [['A', 'B','A', 'N'], ['D', 'O','N', 'D'], ['QU', 'I','T', 'O'], ['QU', 'I','T', 'N']] #boggle_board_randomizer.randomize_board() #
+        self.__board = boggle_board_randomizer.randomize_board() #[['A', 'B','A', 'N'], ['D', 'O','N', 'D'], ['QU', 'I','T', 'O'], ['QU', 'I','T', 'N']]
         self.__score = 0
         self.__n_length_dict = self.set_n_length_dict()
 
@@ -60,7 +60,8 @@ class BoggleModel:
         n_length_dict = dict()
         for i in range(MIN_PATH, MAX_PATH + 1):
             x = len(find_length_n_words(i, self.__board, self.__word_dict))
-            if x > 0:
+            # if x > 0:
+            if i < 8:
                 n_length_dict[i] = x
         return n_length_dict
 
