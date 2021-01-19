@@ -1,5 +1,7 @@
 import tkinter as tki
-
+import pygame
+from tkmacosx import Button
+#import winsound
 import datetime
 
 LETTER_HOVER_COlOR = "gray"  # choose colors
@@ -34,14 +36,16 @@ class BoggleGame(tki.Tk):
         self.letters_displsy = ""
         self._path = []
         self.words_left = {}
-        self.seconds_left = 60
+        self.words_leff_frames = []
+        self.words_left_labels = {}
+        self.seconds_left = 180
         self.score = 0
         self.found_words = []
         self.found_words_counter = 0
         self._letters_2 = {}
         self.words_left_labels = {}
         self.game_played_counter = 0
-
+        self.found_words_labels = []
 
     def get_current_cord(self):
         return self.current_coord
@@ -74,22 +78,23 @@ class BoggleGame(tki.Tk):
         for word in self.found_words[self.found_words_counter - 1:]:
             label = tki.Label(self.frames["Board"].found_words_frame, font=("Courier", 15),
                               bg=REGULAR_COLOR, width=15, text=word)
+            self.found_words_labels.append(label)
             label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
     def update_words_left(self):
         for value in self.words_left_labels.values():
             value[0]['text'] = self.words_left[value[1]]
 
-
     def create_words_left(self):
         for i, key in enumerate(self.words_left):
             x = self.make_Frames_for_left_words("i+3", "50", 0, i)
+            self.words_leff_frames.append(x)
             words_left_label = tki.Label(x, font=("Courier", 30),
                                          bg=REGULAR_COLOR, text=str(key) + ":")
             words_left_label.pack(side=tki.LEFT, fill=tki.BOTH)
             words_left_label__ = tki.Label(x, font=("Courier", 30),
                                            bg=REGULAR_COLOR, width=5, relief="ridge", text=str(self.words_left[key]))
-            self.words_left_labels[i] = (words_left_label__,key)
+            self.words_left_labels[i] = (words_left_label__, key)
             words_left_label__.pack(side=tki.LEFT, fill=tki.BOTH)
 
     def make_Frames_for_left_words(self, length, words_left, row, col, rowspan=1, columnspan=1):
@@ -97,6 +102,7 @@ class BoggleGame(tki.Tk):
                                      highlightbackground=REGULAR_COLOR,
                                      highlightthickness=5)
         words_left_frame.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
+        return words_left_frame
 
     def create_board(self):
         for i in range(4):
@@ -119,7 +125,7 @@ class BoggleGame(tki.Tk):
             self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
-        letter = tki.Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
+        letter = Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
                         command=lambda: self.callback(row, col))
         self._letters_2[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
@@ -134,10 +140,9 @@ class BoggleGame(tki.Tk):
             self.seconds_left -= 1
             self.frames["Board"].display_time.after(1000, self.timer_countdown)
         if self.seconds_left == 0:
-             # self.seconds_left = 180
-             self.frames["PlayAgain"].play_again_frame['text'] = f'Time is up! you ended up with {self.score} points'
-             self.frames["PlayAgain"].tkraise()
-
+            self.destroy_words_left()
+            self.frames["PlayAgain"].play_again_frame['text'] = f'Time is up! you ended up with {self.score} points'
+            self.frames["PlayAgain"].tkraise()
 
     def convert_seconds_left_to_time(self):
         return datetime.timedelta(seconds=self.seconds_left)
@@ -146,19 +151,35 @@ class BoggleGame(tki.Tk):
         frame = self.frames[container]
         frame.tkraise()
         if container == "Board":
+            #winsound.PlaySound("pirates_of_the_caribbean.mp3", winsound.SND_ASYNC)
+            # playsound.playsound("pirates_of_the_caribbean.mp3", False)
+            # playsound.playsound("pirates_of_the_caribbean.mp3", True)
+            pygame.mixer.init()
+            pirates = pygame.mixer.Sound("Sounds/pirates_of_the_caribbean.mp3")
+            pirates.set_volume(0.1)
+            pygame.mixer.find_channel(True).play(pirates)
             frame.tkraise()
             self.timer_countdown()
             if self.game_played_counter == 0:
-                self.create_words_left()
-                self.create_found_words()
                 self.game_played_counter += 1
-        else:
-            pass
+            else:
+                self.destroy_words_labels()
+
+    def destroy_words_left(self):
+        for label in self.words_left_labels.values():
+            label[0].destroy()
+        for frame in self.words_leff_frames:
+            frame.destroy()
+        # self.frames["Board"].words_left_frame.destroy()
+        self.words_left_labels = {}
+
+    def destroy_words_labels(self):
+        for label in self.found_words_labels:
+            label.destroy()
+        self.found_words_counter = 0
 
     def run(self):
         self.mainloop()
-
-
 
 
 class Startscreen(tki.Frame):
@@ -210,11 +231,12 @@ class Board(tki.Frame):
                                          highlightthickness=5)
         self.reset_and_check.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
+
 class PlayAgain(tki.Frame):
 
-    def __init__(self,parent, controller):
-        tki.Frame.__init__(self,parent)
+    def __init__(self, parent, controller):
+        tki.Frame.__init__(self, parent)
         self._controller = controller
         self.play_again_frame = tki.Label(self, bg="white", highlightbackground=REGULAR_COLOR, highlightthickness=5,
-                                       font=("Courier", 20))
+                                          font=("Courier", 20))
         self.play_again_frame.pack(side=tki.TOP, fill=tki.BOTH, pady=100, padx=10)
