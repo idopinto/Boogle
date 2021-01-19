@@ -155,8 +155,9 @@ class BoggleGame(tki.Tk):
             # playsound.playsound("pirates_of_the_caribbean.mp3", False)
             # playsound.playsound("pirates_of_the_caribbean.mp3", True)
             pygame.mixer.init()
-            pygame.mixer.music.load("pirates_of_the_caribbean.mp3")
-            pygame.mixer.music.play()
+            pirates = pygame.mixer.Sound("Sounds/pirates_of_the_caribbean.mp3")
+            pirates.set_volume(0.1)
+            pygame.mixer.find_channel(True).play(pirates)
             frame.tkraise()
             self.timer_countdown()
             if self.game_played_counter == 0:

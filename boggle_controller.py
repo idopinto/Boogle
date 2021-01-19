@@ -31,6 +31,8 @@ class BoggleController:
         y = self._model.get_score()
         a = self._gui.score
         if a != y:
+            pygame.mixer.music.load("Sounds/correct.mp3")
+            pygame.mixer.music.play()
             self._gui.found_words_counter += 1
             self._gui.set_score(y)
             self._gui.set_display()
@@ -43,7 +45,10 @@ class BoggleController:
             self._gui.update_words_left()
             self.reset()
         else:
+            pygame.mixer.music.load("Sounds/wrong.mp3")
+            pygame.mixer.music.play()
             self.reset()
+
 
 
 
