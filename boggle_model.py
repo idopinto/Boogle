@@ -58,7 +58,7 @@ class BoggleModel:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     def set_n_length_dict(self):
         n_length_dict = dict()
-        for i in range(MIN_PATH, MAX_PATH + 1):
+        for i in range(MIN_PATH, 6):
             x = len(find_length_n_words(i, self.__board, self.__word_dict))
             # if x > 0:
             if i < 8:

@@ -13,8 +13,11 @@ def load_words_dict(file_path):
     with open(file_path) as data_file:
         word_dict = dict()
         for line in data_file:
-            word = line.strip().split()
-            word_dict[word[0]] = True
+            word = line.strip()
+            if not word:
+                word_dict[""] = True
+            else:
+                word_dict[word] = True
         return word_dict
 
 
@@ -23,11 +26,13 @@ def is_legal_coord(row, col):
 
 
 def check_next_coord(current_coord, next_coord):
-    return math.fabs(current_coord[0] - next_coord[0]) <= 1 and math.fabs(current_coord[1] - next_coord[1]) <= 1
+    if is_legal_coord(next_coord[0], next_coord[1]):
+        return math.fabs(current_coord[0] - next_coord[0]) <= 1 and math.fabs(current_coord[1] - next_coord[1]) <= 1
+    return False
 
 
 def is_valid_path(board, path, words):
-    if len(path) < 3:
+    if not path:
         return None
     word = ''
     for cur in range(len(path) - 1):
@@ -42,44 +47,15 @@ def is_valid_path(board, path, words):
 
 
 def find_length_n_words(n, board, words):
-    if not isinstance(n, int) or n < MIN_PATH or n > MAX_PATH:
-        raise ValueError("Invalid length")
-
-    length_n_words = {word: cond for (word, cond) in words.items() if len(word) == n}
-    n_length_paths_combinations = list(itertools.combinations(BOARD_COORDINATES, n))
-
+    if not isinstance(n, int) or n <= 0:  # MIN_PATH or n > MAX_PATH:
+        return []
+    n_length_paths_combinations = list(itertools.permutations(BOARD_COORDINATES, n))
     result_lst = list()
     for possible_path in n_length_paths_combinations:
-        possible_word = is_valid_path(board, possible_path, length_n_words)
-        if possible_word is not None and length_n_words[possible_word]:
-            length_n_words[possible_word] = False
-            result_lst.append((possible_word, [possible_path]))
+        possible_word = is_valid_path(board, possible_path, words)
+        if possible_word is not None:
+            possible_path = [x for x in possible_path]
+            result_lst.append((possible_word, possible_path))
     return result_lst
 
-#
-# class BoogleGui:
-#     def __init__(self):
-#         pass
-#
-#     def run(self):
-#         pass
-#
-#     def set_display(self):
-#         pass
-#
-#     def get_letters_on_board(self):
-#         pass
 
-# board = boggle_board_randomizer.randomize_board()
-# # print(is_valid_path(board,[()]))
-# my_dict = load_words_dict("boggle_dict.txt")
-# # print(load_words_dict("boggle_dict.txt"))
-# #
-# board1 = [['A', 'A', 'B', "C"], ['E', 'S', 'D', 'E'], ['Z', 'QU', 'A', 'P'], ['A', 'B', 'S', 'D']]
-# for line in board1:
-#     print(line)
-# # print(is_valid_path(board,[(4,2),(4,3),(4,4)],my_dict))
-#
-# print(find_length_n_words(3, board1, my_dict))
-# # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
-# # print(is_valid_path(board1,[(0, 2),(1, 3),(1, 2),(2,2),(3,2)],my_dict))
