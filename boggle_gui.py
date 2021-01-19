@@ -1,7 +1,5 @@
 import tkinter as tki
 import pygame
-from tkmacosx import Button
-#import winsound
 import datetime
 
 LETTER_HOVER_COlOR = "gray"  # choose colors
@@ -10,13 +8,14 @@ LETTER_ACTIVE_COlOR = "slateblue"
 LETTER_STYLE = {"font": ("Courier", 30), "borderwidth": 1, "relief": tki.RAISED, "bg": REGULAR_COLOR,
                 "activebackground": LETTER_ACTIVE_COlOR}
 FILE_NAME = 'boggle_dict.txt'
+BOARD_SIZE = 4
 
 
 class BoggleGame(tki.Tk):
 
     def __init__(self, *args, **kwargs):
         tki.Tk.__init__(self, *args, **kwargs)
-        self.title("BoogleGame")
+        self.title("BoggleGame")
         container = tki.Frame(self)
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
@@ -33,10 +32,10 @@ class BoggleGame(tki.Tk):
         self.current_coord = ()
         self._board_letters = []
         self._letters = {}
-        self.letters_displsy = ""
+        self.letters_display = ""
         self._path = []
         self.words_left = {}
-        self.words_leff_frames = []
+        self.words_left_frames = []
         self.words_left_labels = {}
         self.seconds_left = 180
         self.score = 0
@@ -47,23 +46,28 @@ class BoggleGame(tki.Tk):
         self.game_played_counter = 0
         self.found_words_labels = []
 
-    def get_current_cord(self):
-        return self.current_coord
-
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~SETTERS/GETTERS_METHODS~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     def set_board(self, board):
+        """this function sets the board"""
         self._board_letters = board
 
     def set_words_left(self, dict):
+        """this sets the words left"""
         self.words_left = dict
 
     def set_found_words(self, found_words_list):
+        """this function set the words that were already found"""
         self.found_words = found_words_list
 
     def set_score(self, score):
+        """this function set the score"""
         self.score = score
 
     def set_display(self):
-        self.frames["Board"].display_label["text"] = self.letters_displsy
+        """the function set the GUI main display"""
+        self.frames["Board"].display_label["text"] = self.letters_display
         for coord in self._path:
             self._letters_2[coord]['bg'] = "slateblue"
         self.frames["Board"].display_score["text"] = "Score:" + str(self.score)
@@ -72,23 +76,26 @@ class BoggleGame(tki.Tk):
                 self._letters_2[letter]['bg'] = REGULAR_COLOR
 
     def get_path(self):
+        """this function return the current path"""
         return self._path
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~RESET_METHODS~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
     def create_found_words(self):
+        """this method creates the labels of the found words for GUI"""
         for word in self.found_words[self.found_words_counter - 1:]:
             label = tki.Label(self.frames["Board"].found_words_frame, font=("Courier", 15),
                               bg=REGULAR_COLOR, width=15, text=word)
             self.found_words_labels.append(label)
             label.pack(side=tki.TOP, fill=tki.BOTH, expand=True)
 
-    def update_words_left(self):
-        for value in self.words_left_labels.values():
-            value[0]['text'] = self.words_left[value[1]]
-
     def create_words_left(self):
+        """this method creates the words left labels for GUI"""
         for i, key in enumerate(self.words_left):
-            x = self.make_Frames_for_left_words("i+3", "50", 0, i)
-            self.words_leff_frames.append(x)
+            x = self.make_Frames_for_left_words(0, i)
+            self.words_left_frames.append(x)
             words_left_label = tki.Label(x, font=("Courier", 30),
                                          bg=REGULAR_COLOR, text=str(key) + ":")
             words_left_label.pack(side=tki.LEFT, fill=tki.BOTH)
@@ -97,7 +104,8 @@ class BoggleGame(tki.Tk):
             self.words_left_labels[i] = (words_left_label__, key)
             words_left_label__.pack(side=tki.LEFT, fill=tki.BOTH)
 
-    def make_Frames_for_left_words(self, length, words_left, row, col, rowspan=1, columnspan=1):
+    def make_Frames_for_left_words(self, row, col, rowspan=1, columnspan=1):
+        """this method makes frames for left words labels"""
         words_left_frame = tki.Frame(self.frames["Board"].words_left_frame, bg=REGULAR_COLOR,
                                      highlightbackground=REGULAR_COLOR,
                                      highlightthickness=5)
@@ -105,33 +113,46 @@ class BoggleGame(tki.Tk):
         return words_left_frame
 
     def create_board(self):
-        for i in range(4):
+        """this function creates the board of the game"""
+        for i in range(BOARD_SIZE):
             tki.Grid.columnconfigure(self.frames["Board"].lower_frame, i, weight=1)
 
-        for i in range(4):
+        for i in range(BOARD_SIZE):
             tki.Grid.rowconfigure(self.frames["Board"].lower_frame, i, weight=1)
 
-        for row in range(4):
-            for col in range(4):
+        # create the buttons
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
                 self.make_letter(self._board_letters[row][col], row, col)
 
     def callback(self, row, col):
+        """this method makes"""
         self.current_coord = (row, col)
         if self.current_coord in self._path:
             pass
         else:
             self._path.append((row, col))
-            self.letters_displsy += self._letters[(row, col)]
+            self.letters_display += self._letters[(row, col)]
             self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
-        letter = Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
-                        command=lambda: self.callback(row, col))
+        letter = tki.Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
+                            command=lambda: self.callback(row, col))
         self._letters_2[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
         self._letters[(row, col)] = letter_char
 
         return letter
+
+
+    def update_words_left(self):
+        """this method updates the words left labels"""
+        for value in self.words_left_labels.values():
+            value[0]['text'] = self.words_left[value[1]]
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~TIMER~~~~~~~~~~~~~~~~~~~~~~~#
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     def timer_countdown(self):
         """update label based on the time left"""
@@ -145,15 +166,14 @@ class BoggleGame(tki.Tk):
             self.frames["PlayAgain"].tkraise()
 
     def convert_seconds_left_to_time(self):
+        """this function convert seconds left to minutes"""
         return datetime.timedelta(seconds=self.seconds_left)
 
     def show_frame(self, container):
+        """this function """
         frame = self.frames[container]
         frame.tkraise()
         if container == "Board":
-            #winsound.PlaySound("pirates_of_the_caribbean.mp3", winsound.SND_ASYNC)
-            # playsound.playsound("pirates_of_the_caribbean.mp3", False)
-            # playsound.playsound("pirates_of_the_caribbean.mp3", True)
             pygame.mixer.init()
             pirates = pygame.mixer.Sound("Sounds/pirates_of_the_caribbean.mp3")
             pirates.set_volume(0.1)
@@ -168,9 +188,8 @@ class BoggleGame(tki.Tk):
     def destroy_words_left(self):
         for label in self.words_left_labels.values():
             label[0].destroy()
-        for frame in self.words_leff_frames:
+        for frame in self.words_left_frames:
             frame.destroy()
-        # self.frames["Board"].words_left_frame.destroy()
         self.words_left_labels = {}
 
     def destroy_words_labels(self):
