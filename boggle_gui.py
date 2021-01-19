@@ -1,7 +1,6 @@
 import tkinter as tki
 import pygame
 from tkmacosx import Button
-#import winsound
 import datetime
 
 LETTER_HOVER_COlOR = "gray"  # choose colors
@@ -32,17 +31,17 @@ class BoggleGame(tki.Tk):
         self.show_frame("Startscreen")
         self.current_coord = ()
         self._board_letters = []
-        self._letters = {}
+        self._letters_chars = {}
         self.letters_displsy = ""
         self._path = []
         self.words_left = {}
         self.words_leff_frames = []
         self.words_left_labels = {}
-        self.seconds_left = 180
+        self.seconds_left = 10
         self.score = 0
         self.found_words = []
         self.found_words_counter = 0
-        self._letters_2 = {}
+        self._letters_buttons = {}
         self.words_left_labels = {}
         self.game_played_counter = 0
         self.found_words_labels = []
@@ -65,11 +64,11 @@ class BoggleGame(tki.Tk):
     def set_display(self):
         self.frames["Board"].display_label["text"] = self.letters_displsy
         for coord in self._path:
-            self._letters_2[coord]['bg'] = "slateblue"
+            self._letters_buttons[coord]['bg'] = "slateblue"
         self.frames["Board"].display_score["text"] = "Score:" + str(self.score)
         if not self._path:
-            for letter in self._letters_2:
-                self._letters_2[letter]['bg'] = REGULAR_COLOR
+            for letter in self._letters_buttons:
+                self._letters_buttons[letter]['bg'] = REGULAR_COLOR
 
     def get_path(self):
         return self._path
@@ -121,15 +120,15 @@ class BoggleGame(tki.Tk):
             pass
         else:
             self._path.append((row, col))
-            self.letters_displsy += self._letters[(row, col)]
+            self.letters_displsy += self._letters_chars[(row, col)]
             self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
         letter = Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
                         command=lambda: self.callback(row, col))
-        self._letters_2[(row, col)] = letter
+        self._letters_buttons[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW)
-        self._letters[(row, col)] = letter_char
+        self._letters_chars[(row, col)] = letter_char
 
         return letter
 
