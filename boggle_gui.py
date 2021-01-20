@@ -2,6 +2,7 @@ import tkinter as tki
 import pygame
 import datetime
 
+
 LETTER_HOVER_COlOR = "gray"  # choose colors
 REGULAR_COLOR = "white"
 LETTER_ACTIVE_COlOR = "slateblue"
