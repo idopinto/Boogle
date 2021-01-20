@@ -38,7 +38,7 @@ class BoggleController:
         """
         x = self._gui.get_path()  # path of current word displayed
         self._model.set_path(x)  # sets the path from gui to the model
-        self._model.set_current_display(self._gui.letters_displsy)
+        self._model.set_current_display(self._gui.letters_display)
         self._model.match_word()  # checks if the path is legal and if the word existed and never found before. if yes, also update the model score.
         curr_score = self._gui.score
         new_score = self._model.get_score()
@@ -66,7 +66,7 @@ class BoggleController:
         button, this function clears the screen, means clear the current path and display".
         """
         self._gui._path = []
-        self._gui.letters_displsy = ''
+        self._gui.letters_display = ''
         self._gui.set_display()
 
     def run(self):
