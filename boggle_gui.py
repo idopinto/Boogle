@@ -12,6 +12,7 @@ FILE_NAME = 'boggle_dict.txt'
 BOARD_SIZE = 4
 
 
+
 class BoggleGame(tki.Tk):
 
     def __init__(self, *args, **kwargs):
