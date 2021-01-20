@@ -14,11 +14,10 @@ BOARD_SIZE = 4
 
 
 class BoggleGame(tki.Tk):
-      """This Class is a Tk object which represents the game. this class is build to hold the gui functions
+    """This Class is a Tk object which represents the game. this class is build to hold the gui functions
     and methods to create the graphics and update it. The game is build in a form of 3 layers of 3 big frame objects
-     which it gets as args. The boggle game objects contains them all.
+    which it gets as args. The boggle game objects contains them all.
     the first layer is the start screen object, the second is the board object and the last is the play again object."""
-    
     def __init__(self, *args, **kwargs):
         tki.Tk.__init__(self, *args, **kwargs)
         self.title("BoggleGame")
@@ -51,7 +50,6 @@ class BoggleGame(tki.Tk):
         self.words_left_labels = {}
         self.game_played_counter = 0
         self.found_words_labels = []
-        
     def show_frame(self, container):
         """This method is one of the most imporant methods of the game, for it is controling the frame to 
         present the player at each time. The method gets the frame to show.
@@ -164,14 +162,13 @@ class BoggleGame(tki.Tk):
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
       """This function creates the button of the letter on the borad. the fucntion gets the letter(string) and the 
-      coords in the board to sets the button with the letter to.""" 
-        letter = tki.Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
-                            command=lambda: self.callback(row, col))
-        self._letters_buttons[(row, col)] = letter
-        letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW) # creates the grid of the buttons
-        self._letters_chars[(row, col)] = letter_char
+      coords in the board to sets the button with the letter to."""
+      letter = tki.Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE, command=lambda: self.callback(row, col))
+      self._letters_buttons[(row, col)] = letter
+      letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW) # creates the grid of the buttons
+      self._letters_chars[(row, col)] = letter_char
 
-        return letter
+      return letter
 
 
     def update_words_left(self):
@@ -202,11 +199,11 @@ class BoggleGame(tki.Tk):
     def destroy_words_left(self):
        """This method destroys the words left frames when the time is up
          and a new game is called."""
-        for label in self.words_left_labels.values():
-            label[0].destroy()
-        for frame in self.words_left_frames:
-            frame.destroy()
-        self.words_left_labels = {}
+       for label in self.words_left_labels.values():
+           label[0].destroy()
+       for frame in self.words_left_frames:
+           frame.destroy()
+       self.words_left_labels = {}
 
     def destroy_words_labels(self):
         """This method destroys the words left labels when the time is up
@@ -217,7 +214,7 @@ class BoggleGame(tki.Tk):
 
     def run(self):
       """This method runs the game. when called the mainloop method is called."""
-        self.mainloop()
+      self.mainloop()
 
 
 class Startscreen(tki.Frame):
@@ -225,7 +222,7 @@ class Startscreen(tki.Frame):
         The start screen frame is the upper frame and will raise when the game is launched.
         The constructor of the frame gets the controller (the game object) and
          also holds the start button which starts the game by calling the show frame method of the game. """
-    def __init__(self, parent, controller):
+     def __init__(self, parent, controller):
         tki.Frame.__init__(self, parent)
         self._controller = controller
         self._start_frame = tki.Label(self, bg="white", highlightbackground=REGULAR_COLOR, highlightthickness=5,
