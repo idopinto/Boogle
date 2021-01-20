@@ -14,7 +14,11 @@ BOARD_SIZE = 4
 
 
 class BoggleGame(tki.Tk):
-
+      """This Class is a Tk object which represents the game. this class is build to hold the gui functions
+    and methods to create the graphics and update it. The game is build in a form of 3 layers of 3 big frame objects
+     which it gets as args. The boggle game objects contains them all.
+    the first layer is the start screen object, the second is the board object and the last is the play again object."""
+    
     def __init__(self, *args, **kwargs):
         tki.Tk.__init__(self, *args, **kwargs)
         self.title("BoggleGame")
@@ -24,7 +28,7 @@ class BoggleGame(tki.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (Startscreen, Board, PlayAgain):
+        for F in (Startscreen, Board, PlayAgain): # creating layers with all frames
             screen_name = F.__name__
             frame = F(container, self)
             self.frames[screen_name] = frame
@@ -33,7 +37,7 @@ class BoggleGame(tki.Tk):
         self.show_frame("Startscreen")
         self.current_coord = ()
         self._board_letters = []
-        self._letters = {}
+        self._letters_chars = {}
         self.letters_display = ""
         self._path = []
         self.words_left = {}
@@ -43,14 +47,32 @@ class BoggleGame(tki.Tk):
         self.score = 0
         self.found_words = []
         self.found_words_counter = 0
-        self._letters_2 = {}
+        self._letters_buttons = {}
         self.words_left_labels = {}
         self.game_played_counter = 0
         self.found_words_labels = []
-
+        
+    def show_frame(self, container):
+        """This method is one of the most imporant methods of the game, for it is controling the frame to 
+        present the player at each time. The method gets the frame to show.
+        when the board layer is called, that is when the game begins. """
+        frame = self.frames[container]
+        frame.tkraise()
+        if container == "Board":
+            pygame.mixer.init()
+            pirates = pygame.mixer.Sound("Sounds/pirates_of_the_caribbean.mp3")
+            pirates.set_volume(0.1)
+            pygame.mixer.find_channel(True).play(pirates)
+            frame.tkraise()
+            self.timer_countdown()
+            if self.game_played_counter == 0:
+                self.game_played_counter += 1
+            else:
+                self.destroy_words_labels()    
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     # ~~~~~~SETTERS/GETTERS_METHODS~~~~~~~~~~~~~~~#
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    
     def set_board(self, board):
         """this function sets the board"""
         self._board_letters = board
@@ -71,11 +93,11 @@ class BoggleGame(tki.Tk):
         """the function set the GUI main display"""
         self.frames["Board"].display_label["text"] = self.letters_display
         for coord in self._path:
-            self._letters_2[coord]['bg'] = "slateblue"
+            self._letters_buttons[coord]['bg'] = "slateblue"
         self.frames["Board"].display_score["text"] = "Score:" + str(self.score)
         if not self._path:
-            for letter in self._letters_2:
-                self._letters_2[letter]['bg'] = REGULAR_COLOR
+            for letter in self._letters_buttons:
+                self._letters_buttons[letter]['bg'] = REGULAR_COLOR
 
     def get_path(self):
         """this function return the current path"""
@@ -137,7 +159,7 @@ class BoggleGame(tki.Tk):
             pass
         else:
             self._path.append((row, col))
-            self.letters_display += self._letters[(row, col)]
+            self.letters_display += self._letters_chars[(row, col)]
             self.set_display()
 
     def make_letter(self, letter_char, row, col, rowspan=1, columnspan=1):
@@ -145,9 +167,9 @@ class BoggleGame(tki.Tk):
       coords in the board to sets the button with the letter to.""" 
         letter = tki.Button(self.frames["Board"].lower_frame, text=letter_char, **LETTER_STYLE,
                             command=lambda: self.callback(row, col))
-        self._letters_2[(row, col)] = letter
+        self._letters_buttons[(row, col)] = letter
         letter.grid(row=row, column=col, rowspan=rowspan, columnspan=columnspan, sticky=tki.NSEW) # creates the grid of the buttons
-        self._letters[(row, col)] = letter_char
+        self._letters_chars[(row, col)] = letter_char
 
         return letter
 
@@ -176,21 +198,6 @@ class BoggleGame(tki.Tk):
         """this function convert seconds left to minutes"""
         return datetime.timedelta(seconds=self.seconds_left)
 
-    def show_frame(self, container):
-        """this function """
-        frame = self.frames[container]
-        frame.tkraise()
-        if container == "Board":
-            pygame.mixer.init()
-            pirates = pygame.mixer.Sound("Sounds/pirates_of_the_caribbean.mp3")
-            pirates.set_volume(0.1)
-            pygame.mixer.find_channel(True).play(pirates)
-            frame.tkraise()
-            self.timer_countdown()
-            if self.game_played_counter == 0:
-                self.game_played_counter += 1
-            else:
-                self.destroy_words_labels()
 
     def destroy_words_left(self):
        """This method destroys the words left frames when the time is up
@@ -231,7 +238,12 @@ class Startscreen(tki.Frame):
 
 
 class Board(tki.Frame):
-
+    """This class is a frame object. This frame is the main frame which represents the game board, score etc.
+        The board frame is the middle frame and will raise when the game is launched and the start button was pressed.
+        The constructor of the board object sets the frames and labels of in the frame like the board,score, found_words etc.
+        Because this frame is the main frame of the game, it does not holds any buttons and mainly controlled from the 
+        outside because of the many changes while playing the game. """
+    
     def __init__(self, parent, controller):
         tki.Frame.__init__(self, parent)
         self.outer_frame = tki.Frame(self, bg=REGULAR_COLOR, highlightbackground=REGULAR_COLOR, highlightthickness=5)
